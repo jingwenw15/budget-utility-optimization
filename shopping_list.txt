@@ -1,9 +1,9 @@
-toothpaste, 0.9, 5
-shampoo, 0.9, 5
-bread, 0.7, 4
-movie ticket, 0.1, 2
-phone case, 0.2, 1
-water bottle, 0.5, 10
+toothpaste, 0.9, 2
+shampoo, 0.9, 15
+bread, 0.7, 5
+movie ticket, 0.1, 20
+phone case, 0.2, 22
+water bottle, 0.5, 15
 salad mix, 1, 10
 music subscription, 0.6, 5
 iphone, 0.7, 800
