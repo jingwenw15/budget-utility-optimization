@@ -7,3 +7,5 @@ water bottle, 0.5, 15
 salad mix, 1, 10
 music subscription, 0.6, 5
 iphone, 0.7, 800
+posters, 0.5, 18
+speaker, 0.4, 100
