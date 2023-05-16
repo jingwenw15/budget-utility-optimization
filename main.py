@@ -8,7 +8,8 @@ Spending penalty: the penalty for spending money in general
 '''
 def penalty_constraint_method(num_its=20, overbudget_penalty=500, spending_penalty=0.5): 
     student = CollegeStudent()
-    max_util = float('-inf')
+    max_util_with_penalty = float('-inf')
+    max_util = None 
     pt_cost = None 
     best_pt = None 
     for _ in range(num_its): 
@@ -16,8 +17,9 @@ def penalty_constraint_method(num_its=20, overbudget_penalty=500, spending_penal
         total_util = np.sum(pt * student.shopping_utils) 
         total_cost = np.sum(pt * student.shopping_costs)
         util_plus_penalty = total_util - overbudget_penalty * max(total_cost - student.budget, 0) - spending_penalty * total_cost
-        if util_plus_penalty > max_util: 
-            max_util = util_plus_penalty
+        if util_plus_penalty > max_util_with_penalty: 
+            max_util_with_penalty = util_plus_penalty
+            max_util = total_util 
             best_pt = pt 
             pt_cost = total_cost 
     print([student.shopping_list[i] for i, item in enumerate(best_pt) if item == 1])
