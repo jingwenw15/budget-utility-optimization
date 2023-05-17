@@ -1,10 +1,13 @@
 from CollegeStudent import CollegeStudent
 import numpy as np 
 import random 
+import argparse
 
 '''
 Overbudget penalty: the penalty for spending money above the budget 
 Spending penalty: the penalty for spending money in general 
+We optimize for utility subject to the constraint of budget. 
+Another "constraint" is the spending penalty (since our second objective is saving money). 
 '''
 def quadratic_penalty_constraint_method(num_its=20, overbudget_penalty=500, spending_penalty=0.5): 
     student = CollegeStudent()
@@ -38,4 +41,13 @@ def sample_point(num_items, threshold=0.7):
     return pt 
         
 
-quadratic_penalty_constraint_method()
+def main(): 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('method')
+    args = parser.parse_args()
+    if args.method == 'quad_penalty': 
+        quadratic_penalty_constraint_method()
+
+
+if __name__ == '__main__': 
+    main() 
