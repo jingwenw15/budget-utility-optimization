@@ -12,12 +12,14 @@ Could try simplex algorithm then. Or other algorithms.
 
 def main(): 
     parser = argparse.ArgumentParser()
+    parser.add_argument('problem')
     parser.add_argument('method')
     args = parser.parse_args()
-    if args.method == 'quad_penalty': 
-        quadratic_penalty_constraint_binary()
-    elif args.method == 'hooke_binary': 
-        hooke_jeeves_binary() 
+    if args.problem == 'binary':
+        if args.method == 'quad': 
+            quadratic_penalty_constraint_binary()
+        elif args.method == 'hooke': 
+            hooke_jeeves_binary() 
 
 
 if __name__ == '__main__': 
