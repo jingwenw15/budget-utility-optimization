@@ -26,3 +26,4 @@ earplugs, 0.98, 5
 clorox wipes, 1, 7
 peanut butter, 0.87, 4.5
 lunch at shake shack, 0.5, 12
+textbook, 0.99, 80
