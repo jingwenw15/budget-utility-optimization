@@ -29,6 +29,8 @@ def quadratic_penalty_constraint_method(num_its=20, overbudget_penalty=500, spen
     print(f'Money spent: {pt_cost} \n"Money saved: {student.budget - pt_cost}\nUtility: {max_util}')
     return best_pt 
 
+
+
 '''
 For each item, we buy it with probability equal to threshold. 
 '''

@@ -9,3 +9,20 @@ music subscription, 0.6, 5
 iphone, 0.7, 800
 posters, 0.5, 18
 speaker, 0.4, 100
+headphones, 0.7, 105
+mini vacuum, 0.8, 35
+makeup, 0.75, 10
+rotisserie chicken, 0.9, 5
+dinner at ramen nagi, 0.6, 20
+floss, 0.9, 2
+netflix subscription, 0.6, 15
+pink cardigan, 0.7, 27
+sunscreen, 0.85, 12
+mandarin oranges, 0.9, 8
+cabbage, 0.9, 4
+cheese, 0.8, 5
+pita chips, 0.7, 5.5
+earplugs, 0.98, 5
+clorox wipes, 1, 7
+peanut butter, 0.87, 4.5
+lunch at shake shack, 0.5, 12
