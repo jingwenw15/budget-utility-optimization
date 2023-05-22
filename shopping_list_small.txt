@@ -1,0 +1,10 @@
+toothpaste, 0.9, 1, 3
+shampoo, 0.9, 15, 2
+bread, 0.7, 5, 2
+movie ticket, 0.1, 20, 1
+phone case, 0.2, 22, 1
+headphones, 0.7, 105, 1
+mini vacuum, 0.8, 35, 1
+rotisserie chicken, 0.9, 5, 1
+mandarin oranges, 0.9, 5, 2
+cabbage, 0.9, 3, 2
