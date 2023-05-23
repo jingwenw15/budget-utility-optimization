@@ -21,6 +21,10 @@ def sample_point_multi(student: CollegeStudent, threshold=0.4):
         pt[i] = random.choice(range(int(student.max_amounts[i])+1))
     return pt 
 
+'''
+Quadratic penalty function with the possibility of buying multiple of each item,
+up to a maximum amount specified in the shopping list. 
+'''
 def quad_penalty_multi(file='shopping_list.txt', num_its=2000, overbudget_penalty=1000, spending_penalty=500): 
     student = CollegeStudent(file)
     max_util_with_penalty = float('-inf')
@@ -38,4 +42,3 @@ def quad_penalty_multi(file='shopping_list.txt', num_its=2000, overbudget_penalt
             pt_cost = total_cost 
     print_results(student, best_pt, pt_cost, max_util)
     return best_pt 
-
