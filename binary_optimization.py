@@ -86,6 +86,3 @@ def brute_force_binary(file='shopping_list_small.txt', overbudget_penalty=0.05, 
             best_pt = pt
             best_util, best_cost = util, cost 
     print_results(student, best_pt, best_cost, best_util)
-
-
-    

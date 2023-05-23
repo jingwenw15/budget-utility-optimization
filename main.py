@@ -1,5 +1,6 @@
 import argparse
 from binary_optimization import *
+from multi_optimization import * 
 
                 
 
@@ -16,6 +17,9 @@ def main():
             hooke_jeeves_binary(args.file) 
         elif args.method == 'brute':
             brute_force_binary(args.file)
+    elif args.problem == 'multi': 
+        if args.method == 'quad': 
+            quad_penalty_multi()
 
 
 if __name__ == '__main__': 

@@ -27,3 +27,4 @@ clorox wipes, 1, 7, 2
 peanut butter, 0.87, 4.5, 2
 lunch at shake shack, 0.5, 12, 1
 textbook, 0.99, 80, 1
+concert ticket, 0.8, 125, 1
