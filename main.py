@@ -19,7 +19,9 @@ def main():
             brute_force_binary(args.file)
     elif args.problem == 'multi': 
         if args.method == 'quad': 
-            quad_penalty_multi()
+            quad_penalty_multi(args.file)
+        elif args.method == 'hooke':
+            hooke_jeeves_multi(args.file)
 
 
 if __name__ == '__main__': 
