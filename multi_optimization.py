@@ -7,30 +7,34 @@ import random
 import numpy as np 
 from CollegeStudent import CollegeStudent
 from utils import *
+import matplotlib.pyplot as plt 
 
 '''
-For each item, we buy it with probability equal to threshold. 
 Note that in this method, we can buy up to the item limit. 
+With probability threshold, we do not buy the item. 
 '''
-def sample_point_multi(student: CollegeStudent, threshold=0.4): 
+def sample_point_multi(student: CollegeStudent, saving_threshold=0.2): 
     # does not use previous distribution at all 
     pt = np.zeros((len(student.shopping_list), 1))
     for i in range(len(student.shopping_list)): 
         pt[i] = random.choice(range(int(student.max_amounts[i])+1))
+        if random.random() < saving_threshold: 
+            pt[i] = 0
     return pt 
 
 '''
 Quadratic penalty function with the possibility of buying multiple of each item,
 up to a maximum amount specified in the shopping list. 
 '''
-def quad_penalty_multi(file='shopping_list.txt', num_its=2000, overbudget_penalty=1000, spending_penalty=500): 
+def quad_penalty_multi(file='shopping_list.txt', num_its=20000, overbudget_penalty=1, spending_penalty=1, plot=False): 
     student = CollegeStudent(file)
     max_util_with_penalty = float('-inf')
     max_util = None 
     pt_cost = None 
     best_pt = None 
-    for _ in range(num_its): 
-        pt = sample_point_multi(student)
+    if plot: history = []
+    for it in range(num_its): 
+        pt = sample_point_multi(student, saving_threshold=0.15)
         total_util, total_cost = calc_util_and_cost(pt, student.shopping_utils, student.shopping_costs)
         util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
         if util_plus_penalty > max_util_with_penalty: 
@@ -38,7 +42,12 @@ def quad_penalty_multi(file='shopping_list.txt', num_its=2000, overbudget_penalt
             max_util = total_util 
             best_pt = pt 
             pt_cost = total_cost 
+            # history.append(max_util_with_penalty)
+        if plot and it % 1000 == 0: history.append(util_plus_penalty)
     print_results(student, best_pt, pt_cost, max_util)
+    if plot: 
+        plt.plot([i+1 for i in range(len(history))], history)
+        plt.show()
     return best_pt 
 
 
@@ -46,12 +55,13 @@ def quad_penalty_multi(file='shopping_list.txt', num_its=2000, overbudget_penalt
 Hooke Jeeves for multi optimization. 
 We manually constrain the problem to prevent Hooke Jeeves from moving outside the constraint boundaries. 
 '''
-def hooke_jeeves_multi(file='shopping_list.txt', num_its=50, overbudget_penalty=0.05, spending_penalty=0.05): 
+def hooke_jeeves_multi(file='shopping_list.txt', num_its=60, overbudget_penalty=0.05, spending_penalty=0.05, plot=False): 
     student = CollegeStudent(file)
     shopping_list_len = len(student.shopping_list)
     best_pt = sample_point_multi(student)
     total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
     util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
+    if plot: history = []
     for _ in range(num_its): 
         best_pt_after_it = best_pt 
         best_util, best_cost = total_util, total_cost
@@ -68,10 +78,14 @@ def hooke_jeeves_multi(file='shopping_list.txt', num_its=50, overbudget_penalty=
                     best_util_plus_penalty = new_util_plus_penalty
                     best_pt_after_it = new_pt
                     best_util, best_cost = util, cost 
+        if plot: history.append(best_util_plus_penalty)
         # only update everything after exploring all dimensions in an iteration 
         total_util, total_cost = best_util, best_cost
         util_plus_penalty = best_util_plus_penalty
         best_pt = best_pt_after_it
+    if plot: 
+        plt.plot([i+1 for i in range(len(history))], history)
+        plt.show()
     print_results(student, best_pt, total_cost, total_util)
 
 def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3): 
@@ -83,14 +97,15 @@ def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3):
             new_pt[i] = old_pt[i]
     return new_pt 
 
-def simulated_annealing_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=500, spending_penalty=5, temp=5, decay=1.01):
+def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_penalty=500, spending_penalty=5, temp=5, decay=1.01, plot=False):
     student = CollegeStudent(file) 
     best_pt = sample_point_multi(student)
     total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
     best_util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
     cur_pt = best_pt
     cur_util_plus_penalty = best_util_plus_penalty
-    for _ in range(num_its): 
+    if plot: history = [cur_util_plus_penalty]
+    for it in range(num_its): 
         new_pt = transition_to_new_pt(cur_pt, student)
         new_util, new_cost = calc_util_and_cost(new_pt, student.shopping_utils, student.shopping_costs)
         new_util_plus_penalty = calc_util_plus_penalty(new_util, new_cost, overbudget_penalty, spending_penalty, student.budget)
@@ -101,4 +116,8 @@ def simulated_annealing_multi(file='shopping_list.txt', num_its=100, overbudget_
             best_util_plus_penalty = new_util_plus_penalty
             best_pt = new_pt 
             total_util, total_cost = new_util, new_cost 
+        if plot: history.append(new_util_plus_penalty)
+    if plot: 
+        plt.plot([i+1 for i in range(len(history))], history)
+        plt.show()
     print_results(student, best_pt, total_cost, total_util)
