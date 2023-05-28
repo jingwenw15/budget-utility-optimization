@@ -22,6 +22,8 @@ def main():
             quad_penalty_multi(args.file)
         elif args.method == 'hooke':
             hooke_jeeves_multi(args.file)
+        elif args.method == 'anneal':
+            simulated_annealing_multi(args.file)
 
 
 if __name__ == '__main__': 

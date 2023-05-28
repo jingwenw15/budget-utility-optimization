@@ -1,9 +1,7 @@
 """ 
-TODO:
 If we make this problem being able to buy multiple of each item (constrained by max)
-it's kind of like multiobjective multidimensional optimization problem except with 
+it's multiobjective multidimensional optimization problem except with 
 linear constraints. 
-Could try simplex algorithm then (actually would have to use slack vars to make it equality). Or other algorithms. 
 """
 import random 
 import numpy as np 
@@ -74,4 +72,33 @@ def hooke_jeeves_multi(file='shopping_list.txt', num_its=50, overbudget_penalty=
         total_util, total_cost = best_util, best_cost
         util_plus_penalty = best_util_plus_penalty
         best_pt = best_pt_after_it
+    print_results(student, best_pt, total_cost, total_util)
+
+def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3): 
+    new_pt = np.zeros(old_pt.shape)
+    for i in range(len(student.shopping_list)):
+        if random.random() < threshold: 
+            new_pt[i] = random.choice(range(int(student.max_amounts[i])+1)) # satisfy the constraints 
+        else:
+            new_pt[i] = old_pt[i]
+    return new_pt 
+
+def simulated_annealing_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=500, spending_penalty=5, temp=5, decay=1.01):
+    student = CollegeStudent(file) 
+    best_pt = sample_point_multi(student)
+    total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
+    best_util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
+    cur_pt = best_pt
+    cur_util_plus_penalty = best_util_plus_penalty
+    for _ in range(num_its): 
+        new_pt = transition_to_new_pt(cur_pt, student)
+        new_util, new_cost = calc_util_and_cost(new_pt, student.shopping_utils, student.shopping_costs)
+        new_util_plus_penalty = calc_util_plus_penalty(new_util, new_cost, overbudget_penalty, spending_penalty, student.budget)
+        if new_util_plus_penalty > cur_util_plus_penalty or random.random() < np.exp(- temp * decay):
+            cur_pt = new_pt 
+            cur_util_plus_penalty = new_util_plus_penalty
+        if new_util_plus_penalty > best_util_plus_penalty:  # global update 
+            best_util_plus_penalty = new_util_plus_penalty
+            best_pt = new_pt 
+            total_util, total_cost = new_util, new_cost 
     print_results(student, best_pt, total_cost, total_util)
