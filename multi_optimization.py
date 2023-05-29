@@ -54,6 +54,7 @@ def quad_penalty_multi(file='shopping_list.txt', num_its=20000, overbudget_penal
 '''
 Hooke Jeeves for multi optimization. 
 We manually constrain the problem to prevent Hooke Jeeves from moving outside the constraint boundaries. 
+We also don't shrink the step size - every step is just 1. 
 '''
 def hooke_jeeves_multi(file='shopping_list.txt', num_its=60, overbudget_penalty=0.05, spending_penalty=0.05, plot=False): 
     student = CollegeStudent(file)
@@ -97,7 +98,10 @@ def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3):
             new_pt[i] = old_pt[i]
     return new_pt 
 
-def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_penalty=500, spending_penalty=5, temp=5, decay=1.01, plot=False):
+'''
+Simulated annealing algorithm. 
+'''
+def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_penalty=0.5, spending_penalty=0.5, temp=5, decay=1.01, plot=False):
     student = CollegeStudent(file) 
     best_pt = sample_point_multi(student)
     total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
@@ -120,4 +124,42 @@ def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_
     if plot: 
         plt.plot([i+1 for i in range(len(history))], history)
         plt.show()
+    print_results(student, best_pt, total_cost, total_util)
+
+
+def genetic_algorithm_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=0.5, spending_penalty=0.5, pop_size=2000, mutation_rate=0.5, plot=False): 
+    # TODO: include visuals of how the chromosomes get recombined 
+    student = CollegeStudent(file)
+
+    # sample initial population 
+    pop = [sample_point_multi(student) for _ in range(pop_size)] 
+    best_pt = None 
+    total_cost, total_util = None, None 
+
+    for _ in range(num_its):
+        new_pop = []
+        all_util_costs = [calc_util_and_cost(pt, student.shopping_utils, student.shopping_costs) for pt in pop]
+        obj_evals = np.array([calc_util_plus_penalty(all_util_costs[i][0], all_util_costs[i][1], overbudget_penalty, spending_penalty, student.budget) for i in range(len(all_util_costs))])
+        
+        # select top k parents every time  
+        # reference: https://stackoverflow.com/questions/6910641/how-do-i-get-indices-of-n-maximum-values-in-a-numpy-array
+        k = len(pop) // 2
+        k = k - 1 if k % 2 != 0 else k # make k even, round down  
+        if k <= 1: break # break early if no parent pairs can be formed 
+        top_k_indices = np.argpartition(obj_evals, -k)[-k:]
+        top_k_indivs = [pop[i] for i in top_k_indices]
+
+        best_pt = top_k_indivs[-1]
+        total_util, total_cost = all_util_costs[top_k_indices[-1]]
+
+        # uniform crossover
+        for p in range(0, k, 2): 
+            parent1, parent2 = top_k_indivs[p], top_k_indivs[p+1]
+            child = np.array([parent1[b] if random.random() < 0.5 else parent2[b] for b in range(len(parent1))]).reshape(-1, 1)
+            new_pop.append(child)
+            # mutate child 
+            if random.random() < mutation_rate: 
+                child = transition_to_new_pt(child, student, threshold=1/len(child)) # rate is 1/m 
+        pop = new_pop 
+    
     print_results(student, best_pt, total_cost, total_util)
