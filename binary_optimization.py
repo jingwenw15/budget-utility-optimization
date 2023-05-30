@@ -21,9 +21,10 @@ def sample_point_binary(num_items, threshold=0.4):
 Overbudget penalty: the penalty for spending money above the budget 
 Spending penalty: the penalty for spending money in general 
 We optimize for utility subject to the constraint of budget. 
-Another "constraint" is the spending penalty (since our second objective is saving money). 
+Another objective is the spending penalty (since our second objective is saving money). 
+We randomly sample points. 
 '''
-def quadratic_penalty_constraint_binary(file='shopping_list.txt', num_its=20, overbudget_penalty=1, spending_penalty=0.5): 
+def quadratic_penalty_sampling_binary(file='shopping_list.txt', num_its=20, overbudget_penalty=1, spending_penalty=0.5): 
     student = CollegeStudent(file)
     max_util_with_penalty = float('-inf')
     max_util = None 

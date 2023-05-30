@@ -25,8 +25,9 @@ def sample_point_multi(student: CollegeStudent, saving_threshold=0.2):
 '''
 Quadratic penalty function with the possibility of buying multiple of each item,
 up to a maximum amount specified in the shopping list. 
+We randomly sample points. 
 '''
-def quad_penalty_multi(file='shopping_list.txt', num_its=20000, overbudget_penalty=1, spending_penalty=1, plot=False): 
+def quad_penalty_sampling_multi(file='shopping_list.txt', num_its=20000, overbudget_penalty=1, spending_penalty=1, plot=False): 
     student = CollegeStudent(file)
     max_util_with_penalty = float('-inf')
     max_util = None 
@@ -56,7 +57,7 @@ Hooke Jeeves for multi optimization.
 We manually constrain the problem to prevent Hooke Jeeves from moving outside the constraint boundaries. 
 We also don't shrink the step size - every step is just 1. 
 '''
-def hooke_jeeves_multi(file='shopping_list.txt', num_its=60, overbudget_penalty=0.05, spending_penalty=0.05, plot=False): 
+def hooke_jeeves_multi(file='shopping_list.txt', num_its=60, overbudget_penalty=5, spending_penalty=0.3, plot=False): 
     student = CollegeStudent(file)
     shopping_list_len = len(student.shopping_list)
     best_pt = sample_point_multi(student)
@@ -101,7 +102,7 @@ def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3):
 '''
 Simulated annealing algorithm. 
 '''
-def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_penalty=0.5, spending_penalty=0.5, temp=5, decay=1.01, plot=False):
+def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_penalty=0.5, spending_penalty=0.5, temp=5, decay=0.95, plot=False):
     student = CollegeStudent(file) 
     best_pt = sample_point_multi(student)
     total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
@@ -113,7 +114,7 @@ def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_
         new_pt = transition_to_new_pt(cur_pt, student)
         new_util, new_cost = calc_util_and_cost(new_pt, student.shopping_utils, student.shopping_costs)
         new_util_plus_penalty = calc_util_plus_penalty(new_util, new_cost, overbudget_penalty, spending_penalty, student.budget)
-        if new_util_plus_penalty > cur_util_plus_penalty or random.random() < np.exp(- temp * decay):
+        if new_util_plus_penalty > cur_util_plus_penalty or random.random() < np.exp((new_util_plus_penalty - cur_util_plus_penalty)/(temp * decay) + 1e-8):
             cur_pt = new_pt 
             cur_util_plus_penalty = new_util_plus_penalty
         if new_util_plus_penalty > best_util_plus_penalty:  # global update 
@@ -127,8 +128,7 @@ def simulated_annealing_multi(file='shopping_list.txt', num_its=200, overbudget_
     print_results(student, best_pt, total_cost, total_util)
 
 
-def genetic_algorithm_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=0.5, spending_penalty=0.5, pop_size=2000, mutation_rate=0.5, plot=False): 
-    # TODO: include visuals of how the chromosomes get recombined 
+def genetic_algorithm_multi(file='shopping_list.txt', num_its=50, overbudget_penalty=0.5, spending_penalty=0.5, pop_size=2000, mutation_rate=0.5, plot=False): 
     student = CollegeStudent(file)
 
     # sample initial population 
@@ -136,7 +136,7 @@ def genetic_algorithm_multi(file='shopping_list.txt', num_its=100, overbudget_pe
     best_pt = None 
     total_cost, total_util = None, None 
 
-    for _ in range(num_its):
+    for it in range(num_its):
         new_pop = []
         all_util_costs = [calc_util_and_cost(pt, student.shopping_utils, student.shopping_costs) for pt in pop]
         obj_evals = np.array([calc_util_plus_penalty(all_util_costs[i][0], all_util_costs[i][1], overbudget_penalty, spending_penalty, student.budget) for i in range(len(all_util_costs))])
@@ -156,10 +156,10 @@ def genetic_algorithm_multi(file='shopping_list.txt', num_its=100, overbudget_pe
         for p in range(0, k, 2): 
             parent1, parent2 = top_k_indivs[p], top_k_indivs[p+1]
             child = np.array([parent1[b] if random.random() < 0.5 else parent2[b] for b in range(len(parent1))]).reshape(-1, 1)
-            new_pop.append(child)
             # mutate child 
             if random.random() < mutation_rate: 
                 child = transition_to_new_pt(child, student, threshold=1/len(child)) # rate is 1/m 
+            new_pop.append(child)
         pop = new_pop 
     
     print_results(student, best_pt, total_cost, total_util)
