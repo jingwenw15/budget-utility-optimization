@@ -24,14 +24,14 @@ We optimize for utility subject to the constraint of budget.
 Another objective is the spending penalty (since our second objective is saving money). 
 We randomly sample points. 
 '''
-def quadratic_penalty_sampling_binary(file='shopping_list.txt', num_its=20, overbudget_penalty=1, spending_penalty=0.5): 
+def quadratic_penalty_sampling_binary(file='shopping_list.txt', num_its=200, overbudget_penalty=0.2, spending_penalty=0.05): 
     student = CollegeStudent(file)
     max_util_with_penalty = float('-inf')
     max_util = None 
     pt_cost = None 
     best_pt = None 
     for _ in range(num_its): 
-        pt = sample_point_binary(len(student.shopping_list))
+        pt = sample_point_binary(len(student.shopping_list), threshold=0.5)
         total_util, total_cost = calc_util_and_cost(pt, student.shopping_utils, student.shopping_costs)
         util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
         if util_plus_penalty > max_util_with_penalty: 
@@ -44,19 +44,20 @@ def quadratic_penalty_sampling_binary(file='shopping_list.txt', num_its=20, over
 
    
 
-def hooke_jeeves_binary(file='shopping_list.txt', num_its=50, overbudget_penalty=0.05, spending_penalty=0.05): 
+def hooke_jeeves_binary(file='shopping_list.txt', num_its=1000, overbudget_penalty=0.05, spending_penalty=0.2): 
     student = CollegeStudent(file)
     shopping_list_len = len(student.shopping_list)
-    pt = sample_point_binary(shopping_list_len)
+    pt = sample_point_binary(shopping_list_len, threshold=0.5)
     best_pt = pt 
     total_util, total_cost = calc_util_and_cost(pt, student.shopping_utils, student.shopping_costs)
     util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
+    cur_explored_pt = best_pt  
     for _ in range(num_its): 
         best_pt_after_it = best_pt 
         best_util, best_cost = total_util, total_cost
         best_util_plus_penalty = util_plus_penalty
         for dim in range(shopping_list_len): 
-            new_pt = best_pt.copy()
+            new_pt = cur_explored_pt.copy()
             new_pt[dim] = 1 - best_pt[dim] # flip the purchase
             util, cost = calc_util_and_cost(new_pt, student.shopping_utils, student.shopping_costs)
             new_util_plus_penalty = calc_util_plus_penalty(util, cost, overbudget_penalty, spending_penalty, student.budget)
@@ -65,13 +66,17 @@ def hooke_jeeves_binary(file='shopping_list.txt', num_its=50, overbudget_penalty
                 best_pt_after_it = new_pt
                 best_util, best_cost = util, cost 
         # only update everything after exploring all dimensions in an iteration 
-        total_util, total_cost = best_util, best_cost
-        util_plus_penalty = best_util_plus_penalty
-        best_pt = best_pt_after_it
+        if best_util_plus_penalty > util_plus_penalty: 
+            total_util, total_cost = best_util, best_cost
+            util_plus_penalty = best_util_plus_penalty
+            best_pt = best_pt_after_it
+            cur_explored_pt = best_pt 
+        else: 
+            cur_explored_pt = sample_point_binary(shopping_list_len, threshold=0.1)
     print_results(student, best_pt, total_cost, total_util)
     
 
-def brute_force_binary(file='shopping_list_small.txt', overbudget_penalty=0.05, spending_penalty=0.05):
+def brute_force_binary(file='shopping_list_small.txt', overbudget_penalty=0.05, spending_penalty=0.2):
     student = CollegeStudent(file)
     shopping_list_len = len(student.shopping_list)
     perms = itertools.product(range(2), repeat=shopping_list_len)
