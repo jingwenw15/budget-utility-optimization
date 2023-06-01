@@ -57,12 +57,14 @@ Hooke Jeeves for multi optimization.
 We manually constrain the problem to prevent Hooke Jeeves from moving outside the constraint boundaries. 
 We also don't shrink the step size - every step is just 1. 
 '''
-def hooke_jeeves_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=0.05, spending_penalty=0.07, plot=False, ret_values=False, budget=100): 
+def hooke_jeeves_multi(file='shopping_list.txt', num_its=100, overbudget_penalty=0.05, spending_penalty=0.07, plot=False, ret_values=False, budget=100, use_pareto=False, should_print=True): 
     student = CollegeStudent(file, budget=budget)
     shopping_list_len = len(student.shopping_list)
     best_pt = sample_point_multi(student)
+    obj_fn = calc_util_plus_penalty if not use_pareto else calc_util_obj_fn
+
     total_util, total_cost = calc_util_and_cost(best_pt, student.shopping_utils, student.shopping_costs)
-    util_plus_penalty = calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
+    util_plus_penalty = obj_fn(total_util, total_cost, overbudget_penalty, spending_penalty, student.budget)
     if plot: 
         best_util_plus_penalty_history = []
         best_util_history = []
@@ -77,7 +79,7 @@ def hooke_jeeves_multi(file='shopping_list.txt', num_its=100, overbudget_penalty
                 if new_value < 0 or new_value > student.max_amounts[dim, :]: continue # manually constrain the problem 
                 new_pt[dim] = new_value
                 util, cost = calc_util_and_cost(new_pt, student.shopping_utils, student.shopping_costs)
-                new_util_plus_penalty = calc_util_plus_penalty(util, cost, overbudget_penalty, spending_penalty, student.budget)
+                new_util_plus_penalty = obj_fn(util, cost, overbudget_penalty, spending_penalty, student.budget)
                 if new_util_plus_penalty > util_plus_penalty: 
                     best_util_plus_penalty = new_util_plus_penalty
                     best_pt_after_it = new_pt
@@ -100,8 +102,8 @@ def hooke_jeeves_multi(file='shopping_list.txt', num_its=100, overbudget_penalty
         plt.grid()
         plt.legend()
         plt.show()
-    if not ret_values: print_results(student, best_pt, total_cost, total_util)
-    else: return total_util, 100 - total_cost
+    if should_print: print_results(student, best_pt, total_cost, total_util)
+    if ret_values: return total_util, budget - total_cost
 
 def transition_to_new_pt(old_pt, student: CollegeStudent, threshold=0.3): 
     new_pt = np.zeros(old_pt.shape)

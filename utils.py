@@ -8,6 +8,10 @@ def calc_util_plus_penalty(total_util, total_cost, overbudget_penalty, saving_co
     return total_util - overbudget_penalty * (max(total_cost - budget, 0) ** 2) + ((saving_coefficient * (budget - total_cost)))
 
 
+def calc_util_obj_fn(total_util, total_cost, overbudget_penalty, saving_coefficient, budget):
+    return total_util - overbudget_penalty * (max(total_cost - budget, 0) ** 2) 
+
+
 def print_results(student, best_pt, pt_cost, max_util):
     print('Items bought:', [student.shopping_list[i] for i, item in enumerate(best_pt) if item > 0])
     print('Quantities of each item', [item[0] for item in best_pt if item > 0])
